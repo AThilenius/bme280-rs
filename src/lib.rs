@@ -69,7 +69,6 @@
 //! ```
 
 pub mod i2c;
-pub mod spi;
 
 #[cfg(feature = "async")]
 use core::future::Future;
@@ -587,7 +586,7 @@ where
         self.interface
             .write_register(BME280_RESET_ADDR, BME280_SOFT_RESET_CMD)
             .await?;
-        delay.delay_ms(2).await.map_err(|_| Error::Delay)?; // startup time is 2ms
+        delay.delay_ms(2).await;
         Ok(())
     }
 
@@ -688,7 +687,7 @@ where
         delay: &mut D,
     ) -> Result<Measurements<I::Error>, Error<I::Error>> {
         self.forced(delay).await?;
-        delay.delay_ms(40).await.map_err(|_| Error::Delay)?; // await measurement
+        delay.delay_ms(40).await;
         let measurements = self.interface.read_data(BME280_DATA_ADDR).await?;
         match self.calibration.as_mut() {
             Some(calibration) => {
